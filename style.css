@@ -24,7 +24,15 @@ body{
   color:var(--text);
 }
 
-.wrap{ max-width:1100px; margin:0 auto; padding:18px; }
+/* Safe area for iPhone notch */
+.wrap{
+  max-width:1100px;
+  margin:0 auto;
+  padding-left: max(12px, env(safe-area-inset-left));
+  padding-right: max(12px, env(safe-area-inset-right));
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
 
 .header{
   display:flex;
@@ -34,14 +42,10 @@ body{
   flex-wrap:wrap;
 }
 .header-title h1{ margin:0 0 6px 0; font-size:22px; }
+.header-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
 .muted{ color:var(--muted); }
 .small{ font-size:12px; }
-
-.header-actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
 
 .grid{
   display:grid;
@@ -71,6 +75,7 @@ body{
   margin-bottom:6px;
 }
 
+/* IMPORTANT for iOS: 16px prevents auto-zoom */
 input, select{
   width:100%;
   padding:12px 12px;
@@ -79,13 +84,9 @@ input, select{
   background: rgba(0,0,0,.18);
   color: var(--text);
   outline:none;
-
-  /* iOS: не буде зуму при фокусі */
   font-size:16px;
 }
-input:focus, select:focus{
-  border-color: rgba(43,99,255,.55);
-}
+input:focus, select:focus{ border-color: rgba(43,99,255,.55); }
 
 .row{
   display:flex;
@@ -152,7 +153,7 @@ input:focus, select:focus{
 table{
   width:100%;
   border-collapse:collapse;
-  min-width: 980px;
+  min-width: 1040px;
 }
 th, td{
   padding:10px;
@@ -208,12 +209,27 @@ canvas{
 }
 .modal-head h3{ margin:0; font-size:16px; }
 
-/* ====== RESPONSIVE ====== */
+/* Banks UI */
+.h3{ margin:14px 0 8px 0; font-size:14px; }
+.banks-box{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+.banks-row{ display:flex; gap:10px; flex-wrap:wrap; }
+.banks-row input{ flex: 1 1 220px; }
+.banks-list{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+.bank-item{
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  background: rgba(0,0,0,.12);
+}
+.bank-item input{ flex:1 1 220px; }
+.bank-actions{ display:flex; gap:8px; margin-left:auto; flex-wrap:wrap; }
+
+/* Responsive */
 @media (max-width: 900px){
-  .wrap{ padding:14px; }
   .grid{ grid-template-columns:1fr; }
   .form-grid{ grid-template-columns:1fr; }
-  table{ min-width: 860px; }
+  table{ min-width: 920px; }
   canvas{ height:220px; }
   .header-actions{ width:100%; }
   .header-actions .btn,
@@ -221,9 +237,8 @@ canvas{
 }
 
 @media (max-width: 420px){
-  .wrap{ padding:12px; }
   .card{ padding:12px; border-radius:14px; }
-  table{ min-width: 820px; }
+  table{ min-width: 900px; }
   canvas{ height:200px; }
   .search{ min-width: 0; width:100%; }
 }
