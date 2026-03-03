@@ -1,9 +1,9 @@
-const CACHE = "turnover-pwa-v302";
+const CACHE = "turnover-pwa-v303";
 
 const STATIC_ASSETS = [
-  "./style.css?v=302",
-  "./app.js?v=302",
-  "./manifest.json?v=302",
+  "./style.css?v=303",
+  "./app.js?v=303",
+  "./manifest.json?v=303",
   "./icon-192.png",
   "./icon-512.png"
 ];
@@ -21,11 +21,9 @@ self.addEventListener("activate", (e) => {
   })());
 });
 
-// HTML: network-first, static: cache-first
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   const url = new URL(req.url);
-
   if (url.origin !== self.location.origin) return;
 
   const accept = req.headers.get("accept") || "";
@@ -36,7 +34,7 @@ self.addEventListener("fetch", (e) => {
       try {
         return await fetch(req, { cache: "no-store" });
       } catch {
-        const cached = await caches.match("./index.html?v=302") || await caches.match("./index.html");
+        const cached = await caches.match("./index.html?v=303") || await caches.match("./index.html");
         return cached || new Response("Офлайн. Немає кешованого index.html.", { status: 503 });
       }
     })());

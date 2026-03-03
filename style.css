@@ -1,12 +1,11 @@
+/* те, що було раніше — залишаємо. Додаю тільки нові блоки + turnover-strip */
 :root{
   --bg:#0b1020;
   --muted:#9aa4c7;
   --text:#e9ecff;
   --line:rgba(255,255,255,.08);
-
   --cardTop: rgba(255,255,255,.08);
   --cardBottom: rgba(255,255,255,.03);
-
   --btn:#2b63ff;
   --btn2:#24304f;
   --danger:#ff3b3b;
@@ -24,7 +23,6 @@ body{
   color:var(--text);
 }
 
-/* Safe area for iPhone notch */
 .wrap{
   max-width:1100px;
   margin:0 auto;
@@ -75,7 +73,6 @@ body{
   margin-bottom:6px;
 }
 
-/* IMPORTANT for iOS: 16px prevents auto-zoom */
 input, select{
   width:100%;
   padding:12px 12px;
@@ -106,8 +103,6 @@ input:focus, select:focus{ border-color: rgba(43,99,255,.55); }
   font-weight:700;
   font-size:14px;
 }
-.btn:hover{ filter:brightness(1.05); }
-.btn:active{ transform:translateY(1px); }
 .btn-secondary{ background: var(--btn2); }
 .btn-danger{ background: var(--danger); }
 
@@ -153,7 +148,7 @@ input:focus, select:focus{ border-color: rgba(43,99,255,.55); }
 table{
   width:100%;
   border-collapse:collapse;
-  min-width: 1040px;
+  min-width: 1100px;
 }
 th, td{
   padding:10px;
@@ -213,12 +208,29 @@ tbody tr:hover{ background:rgba(255,255,255,.03); }
 .bank-item input{ flex:1 1 220px; }
 .bank-actions{ display:flex; gap:8px; margin-left:auto; flex-wrap:wrap; }
 
-/* NEW: Turnover strip */
-.turnover-strip{
+/* Analytics cards */
+.analytics-grid{
   display:grid;
-  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap:10px;
   margin-top:12px;
+}
+.a-card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  background: rgba(0,0,0,.12);
+}
+.a-title{ color:var(--muted); font-size:12px; margin-bottom:6px; }
+.a-value{ font-weight:900; font-size:18px; }
+.a-sub{ color:var(--muted); font-size:12px; margin-top:6px; line-height:1.35; }
+
+/* Turnover strip */
+.turnover-strip{
+  display:grid;
+  grid-template-columns: repeat(5, minmax(160px, 1fr));
+  gap:10px;
+  margin-top:10px;
 }
 .turnover-item{
   border:1px solid var(--line);
@@ -226,46 +238,29 @@ tbody tr:hover{ background:rgba(255,255,255,.03); }
   padding:12px;
   background: rgba(0,0,0,.12);
 }
-.turnover-name{
-  font-weight:800;
-  margin-bottom:6px;
-}
-.turnover-value{
-  font-size:16px;
-  font-weight:800;
-}
+.turnover-name{ font-weight:900; margin-bottom:6px; }
+.turnover-value{ font-size:16px; font-weight:900; }
 .turnover-sub{
   margin-top:6px;
   font-size:12px;
   color:var(--muted);
   line-height:1.35;
 }
-.turnover-total{
-  margin-top:12px;
-  display:flex;
-  gap:10px;
-  align-items:baseline;
-  justify-content:flex-end;
-  flex-wrap:wrap;
-}
-.turnover-total-value{
-  font-weight:900;
-  font-size:18px;
-}
 
 /* Responsive */
 @media (max-width: 900px){
   .grid{ grid-template-columns:1fr; }
   .form-grid{ grid-template-columns:1fr; }
-  table{ min-width: 920px; }
+  table{ min-width: 980px; }
   .header-actions{ width:100%; }
   .header-actions .btn,
   .header-actions label.btn{ flex: 1 1 auto; }
   .turnover-strip{ grid-template-columns: 1fr; }
+  .analytics-grid{ grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 420px){
   .card{ padding:12px; border-radius:14px; }
-  table{ min-width: 900px; }
   .search{ min-width: 0; width:100%; }
+  .analytics-grid{ grid-template-columns: 1fr; }
 }

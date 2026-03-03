@@ -3,19 +3,17 @@
 <head>
   <meta charset="utf-8" />
 
-  <!-- iPhone fullscreen + no "need to zoom out" -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1020">
 
-  <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Оборот">
 
   <title>Планер витратного обороту</title>
 
-  <link rel="stylesheet" href="style.css?v=302" />
-  <link rel="manifest" href="manifest.json?v=302" />
+  <link rel="stylesheet" href="style.css?v=303" />
+  <link rel="manifest" href="manifest.json?v=303" />
 </head>
 
 <body>
@@ -57,7 +55,7 @@
         </label>
 
         <label class="field">
-          <span>План витратних операцій/місяць (на банк)</span>
+          <span>План витратних операцій/період (на банк)</span>
           <input id="plannedSpendOps" type="number" min="1" step="1" value="10" />
         </label>
 
@@ -105,6 +103,10 @@
         <button id="btnSaveSettings" class="btn" type="button">Зберегти</button>
         <span id="settingsSaved" class="muted"></span>
       </div>
+
+      <p class="muted small" style="margin-top:10px">
+        ⚡ Період можна змінювати — аналітика оновлюється одразу (без натискання “Зберегти”).
+      </p>
     </section>
 
     <!-- Add operation -->
@@ -146,25 +148,20 @@
       </p>
     </section>
 
-    <!-- NEW: Turnover strip (top) -->
+    <!-- Analytics -->
     <section class="card span-2">
       <div class="panel-header">
         <div>
-          <h2>Оборот по банках</h2>
+          <h2>Аналітика за період</h2>
           <div class="muted" id="periodLabel"></div>
         </div>
-
-        <div class="muted small">
-          (за обраний період, тільки “Використання”)
-        </div>
+        <div class="muted small">(оновлюється одразу при зміні дат/операцій)</div>
       </div>
 
+      <div class="analytics-grid" id="analyticsTop"></div>
+
+      <h3 class="h3" style="margin-top:14px">Оборот по банках</h3>
       <div id="turnoverStrip" class="turnover-strip"></div>
-
-      <div class="turnover-total">
-        <div class="muted">Загальний витратний оборот:</div>
-        <div id="turnoverTotal" class="turnover-total-value">—</div>
-      </div>
     </section>
 
     <!-- Summary -->
@@ -178,9 +175,11 @@
               <th>Банк</th>
               <th>Ціль</th>
               <th>Витратний оборот</th>
-              <th>Залишок до цілі</th>
-              <th>Витратних опер.</th>
-              <th>Залишок опер.</th>
+              <th>% цілі</th>
+              <th>Залишок</th>
+              <th>Витратних</th>
+              <th>Поповнень</th>
+              <th>Поповнення сума</th>
               <th>Остання дата</th>
               <th>Рек. дата</th>
               <th>Рек. тип</th>
@@ -272,6 +271,6 @@
     Дані зберігаються локально (LocalStorage). Для переносу — експорт/імпорт JSON.
   </footer>
 
-  <script src="app.js?v=302"></script>
+  <script src="app.js?v=303"></script>
 </body>
 </html>
