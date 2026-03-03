@@ -2,18 +2,25 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Планер витратного обороту по картках</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Планер витратного обороту</title>
+
   <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b1020">
+  <meta name="theme-color" content="#0b1020">
+
+  <!-- iOS PWA hints -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
+
 <body>
   <header class="wrap header">
-    <div>
-      <h1>Планер витратного обороту по картках</h1>
-      <p class="muted">Оборот рахується тільки за типом <b>“Використання”</b> (витрати).</p>
+    <div class="header-title">
+      <h1>Планер витратного обороту</h1>
+      <p class="muted">Оборот рахується тільки за <b>“Використання”</b> (витрати).</p>
     </div>
+
     <div class="header-actions">
       <button id="btnExport" class="btn">Експорт JSON</button>
       <label class="btn btn-secondary">
@@ -75,7 +82,7 @@
       </div>
 
       <div class="row">
-        <button id="btnSaveSettings" class="btn">Зберегти налаштування</button>
+        <button id="btnSaveSettings" class="btn">Зберегти</button>
         <span id="settingsSaved" class="muted"></span>
       </div>
     </section>
@@ -120,17 +127,21 @@
         <span id="opError" class="error"></span>
       </div>
 
-      <div class="hint">
-        Оборот = сума “Використання” за період. “Поповнення” не додає оборот, але допомагає планувати цикл.
-      </div>
+      <p class="hint">
+        “Поповнення” не впливає на оборот, але використовується для рекомендацій та пауз.
+      </p>
     </section>
 
     <!-- Графік -->
     <section class="card span-2">
       <div class="panel-header">
-        <h2>Графік прогресу витратного обороту</h2>
-        <div class="row">
-          <label class="field" style="min-width:220px">
+        <div>
+          <h2>Графік прогресу</h2>
+          <div class="muted" id="periodLabel"></div>
+        </div>
+
+        <div class="panel-controls">
+          <label class="field">
             <span>Показати карту</span>
             <select id="chartCard">
               <option value="all" selected>Усі (сума)</option>
@@ -141,15 +152,16 @@
               <option value="5">Карта 5</option>
             </select>
           </label>
-          <div class="muted" id="periodLabel"></div>
         </div>
       </div>
+
       <div class="chart-wrap">
-        <canvas id="progressChart" width="1100" height="260"></canvas>
+        <canvas id="progressChart"></canvas>
       </div>
-      <div class="muted" style="margin-top:8px;font-size:12px">
+
+      <p class="muted small">
         Лінія показує накопичені витрати (“Використання”) по днях у вибраному періоді.
-      </div>
+      </p>
     </section>
 
     <!-- Панель -->
@@ -163,26 +175,34 @@
               <th>Карта</th>
               <th>Витратний оборот</th>
               <th>Залишок до цілі</th>
-              <th>Витратних опер. у періоді</th>
-              <th>Залишок витратних опер. (план)</th>
+              <th>Витратних опер.</th>
+              <th>Залишок опер.</th>
               <th>Остання дата</th>
-              <th>Рекоменд. дата</th>
-              <th>Рекоменд. тип</th>
-              <th>Рекоменд. сума</th>
+              <th>Рек. дата</th>
+              <th>Рек. тип</th>
+              <th>Рек. сума</th>
               <th>Примітка</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
+
+      <p class="muted small">
+        На мобільному таблиця скролиться горизонтально — це нормально.
+      </p>
     </section>
 
     <!-- Журнал -->
     <section class="card span-2">
       <div class="panel-header">
-        <h2>Журнал операцій</h2>
-        <div class="row">
-          <input id="search" class="search" placeholder="Пошук: дата, карта, тип…" />
+        <div>
+          <h2>Журнал операцій</h2>
+          <p class="muted small">Пошук працює по даті, карті, типу та сумі.</p>
+        </div>
+
+        <div class="panel-controls">
+          <input id="search" class="search" placeholder="Пошук…" />
           <button id="btnDeleteSelected" class="btn btn-danger">Видалити вибрані</button>
         </div>
       </div>
@@ -206,11 +226,11 @@
   </main>
 
   <!-- Модалка редагування -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-card">
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3>Редагувати операцію</h3>
-        <button id="btnCloseModal" class="icon-btn">✕</button>
+        <button id="btnCloseModal" class="icon-btn" aria-label="Закрити">✕</button>
       </div>
 
       <div class="form-grid">
@@ -249,7 +269,7 @@
     </div>
   </div>
 
-  <footer class="wrap footer muted">
+  <footer class="wrap footer muted small">
     Дані зберігаються локально у браузері (LocalStorage). Для переносу — експорт/імпорт JSON.
   </footer>
 

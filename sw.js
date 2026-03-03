@@ -1,4 +1,4 @@
-const CACHE = "turnover-pwa-v1";
+const CACHE = "turnover-pwa-v2";
 const ASSETS = [
   "./",
   "./index.html",
