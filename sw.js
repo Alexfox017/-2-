@@ -1,9 +1,9 @@
-const CACHE = "turnover-pwa-v301";
+const CACHE = "turnover-pwa-v302";
 
 const STATIC_ASSETS = [
-  "./style.css?v=301",
-  "./app.js?v=301",
-  "./manifest.json?v=301",
+  "./style.css?v=302",
+  "./app.js?v=302",
+  "./manifest.json?v=302",
   "./icon-192.png",
   "./icon-512.png"
 ];
@@ -36,7 +36,7 @@ self.addEventListener("fetch", (e) => {
       try {
         return await fetch(req, { cache: "no-store" });
       } catch {
-        const cached = await caches.match("./index.html?v=301") || await caches.match("./index.html");
+        const cached = await caches.match("./index.html?v=302") || await caches.match("./index.html");
         return cached || new Response("Офлайн. Немає кешованого index.html.", { status: 503 });
       }
     })());

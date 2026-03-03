@@ -1,9 +1,9 @@
 /* Планер витратного обороту (PWA)
    Оборот = сума "Використання" за період
-   Банки: можна додавати/перейменовувати/пересувати/видаляти + своя ціль
+   Банки: додавання/перейменування/переміщення/видалення + своя ціль
 */
 
-const LS_KEY = "turnover_planner_v5_bank_targets";
+const LS_KEY = "turnover_planner_v6_no_chart_strip";
 const $ = (id) => document.getElementById(id);
 
 function todayISO() {
@@ -74,8 +74,8 @@ function defaultState() {
     settings: {
       startDate: startOfMonthISO(now),
       endDate: endOfMonthISO(now),
-      targetDefault: 40000,          // default for NEW banks
-      plannedSpendOps: 10,           // spend ops/month per bank
+      targetDefault: 40000,
+      plannedSpendOps: 10,
       maxOpAmount: 5000,
       minGapDays: 3,
       holdAfterTopUpDays: 5,
@@ -88,8 +88,7 @@ function defaultState() {
         mk("Абанк", 40000),
       ]
     },
-    // op: {id,date,bankId,type,amount}
-    ops: []
+    ops: [] // {id,date,bankId,type,amount}
   };
 }
 
@@ -100,10 +99,7 @@ function normalizeState(st) {
 
   const s = st.settings;
 
-  // migrate old keys
-  if (s.targetPerBank != null && s.targetDefault == null) s.targetDefault = s.targetPerBank;
   if (s.targetDefault == null) s.targetDefault = 40000;
-
   if (!s.startDate) s.startDate = startOfMonthISO(new Date());
   if (!s.endDate) s.endDate = endOfMonthISO(new Date());
 
@@ -113,10 +109,7 @@ function normalizeState(st) {
   s.holdAfterTopUpDays = Math.max(0, Math.floor(safeNum(s.holdAfterTopUpDays ?? 5)));
   s.hideRecsWhenDone = (s.hideRecsWhenDone === "no") ? "no" : "yes";
 
-  // banks migrate: allow strings or missing target/id
-  if (!Array.isArray(s.banks)) {
-    s.banks = [];
-  }
+  if (!Array.isArray(s.banks)) s.banks = [];
   s.banks = s.banks.map((b) => {
     if (typeof b === "string") {
       return { id: crypto.randomUUID(), name: b, target: Math.max(0, safeNum(s.targetDefault)) };
@@ -127,7 +120,6 @@ function normalizeState(st) {
     return { id, name, target };
   });
 
-  // filter ops: keep only ops with existing bankId
   const bankIds = new Set(s.banks.map(b => b.id));
   st.ops = st.ops
     .filter(op => op && typeof op === "object")
@@ -161,11 +153,6 @@ function bankById(id) {
 function bankName(id) {
   return bankById(id)?.name || "—";
 }
-function bankTarget(id) {
-  const b = bankById(id);
-  if (!b) return 0;
-  return Math.max(0, safeNum(b.target));
-}
 
 /* Selects */
 function rebuildBankSelects() {
@@ -173,15 +160,12 @@ function rebuildBankSelects() {
 
   const opBank = $("opBank");
   const editBank = $("editBank");
-  const chartBank = $("chartBank");
 
   const opVal = opBank.value;
   const editVal = editBank.value;
-  const chartVal = chartBank.value;
 
   opBank.innerHTML = "";
   editBank.innerHTML = "";
-  chartBank.innerHTML = `<option value="all">Усі (сума)</option>`;
 
   for (const b of banks) {
     const o1 = document.createElement("option");
@@ -193,17 +177,10 @@ function rebuildBankSelects() {
     o2.value = b.id;
     o2.textContent = b.name;
     editBank.appendChild(o2);
-
-    const o3 = document.createElement("option");
-    o3.value = b.id;
-    o3.textContent = b.name;
-    chartBank.appendChild(o3);
   }
 
   if (banks.some(b => b.id === opVal)) opBank.value = opVal;
   if (banks.some(b => b.id === editVal)) editBank.value = editVal;
-  if (chartVal === "all" || banks.some(b => b.id === chartVal)) chartBank.value = chartVal;
-
   if (!opBank.value && banks[0]) opBank.value = banks[0].id;
 }
 
@@ -353,7 +330,7 @@ function readSettingsFromUI() {
     endDate: $("endDate").value || s.endDate,
     targetDefault: Math.max(0, safeNum($("targetDefault").value)),
     plannedSpendOps: Math.max(1, Math.floor(safeNum($("plannedSpendOps").value))),
-    maxOpAmount: Math.max(0, safeNum($("maxOpAmount").value)),
+    maxOpAmount: Math.max(0, safeNum($("maxOpAmount").value))),
     minGapDays: Math.max(0, Math.floor(safeNum($("minGapDays").value))),
     holdAfterTopUpDays: Math.max(0, Math.floor(safeNum($("holdAfterTopUpDays").value))),
     hideRecsWhenDone: $("hideRecsWhenDone").value === "no" ? "no" : "yes",
@@ -362,7 +339,13 @@ function readSettingsFromUI() {
 }
 
 function saveSettings() {
-  state.settings = readSettingsFromUI();
+  // fix: maxOpAmount parse safely
+  const s = state.settings;
+  state.settings = {
+    ...readSettingsFromUI(),
+    maxOpAmount: Math.max(0, safeNum($("maxOpAmount").value))
+  };
+
   saveState(state);
   $("settingsSaved").textContent = "Збережено ✓";
   setTimeout(() => $("settingsSaved").textContent = "", 1200);
@@ -471,6 +454,33 @@ function computeSummary() {
   }
 
   return results;
+}
+
+function renderTurnoverStrip() {
+  const rows = computeSummary();
+  const strip = $("turnoverStrip");
+  const totalEl = $("turnoverTotal");
+
+  strip.innerHTML = "";
+  let total = 0;
+
+  for (const r of rows) {
+    total += r.spendTurnover;
+
+    const item = document.createElement("div");
+    item.className = "turnover-item";
+    item.innerHTML = `
+      <div class="turnover-name">${escapeHtml(r.bankName)}</div>
+      <div class="turnover-value">${fmtUAH(r.spendTurnover)}</div>
+      <div class="turnover-sub">
+        Ціль: ${fmtUAH(r.target)}<br>
+        Залишок: ${fmtUAH(r.remaining)}
+      </div>
+    `;
+    strip.appendChild(item);
+  }
+
+  totalEl.textContent = fmtUAH(total);
 }
 
 function renderSummary() {
@@ -675,8 +685,7 @@ function importJSON(file) {
   const reader = new FileReader();
   reader.onload = () => {
     try {
-      const obj = normalizeState(JSON.parse(String(reader.result || "")));
-      state = obj;
+      state = normalizeState(JSON.parse(String(reader.result || "")));
       saveState(state);
       applySettingsToUI();
       renderAll();
@@ -687,130 +696,14 @@ function importJSON(file) {
   reader.readAsText(file);
 }
 
-/* Chart */
-function buildDailySpendSeries(bankFilter) {
-  const s = state.settings;
-  const start = parseISO(s.startDate);
-  const end = parseISO(s.endDate);
-
-  const map = new Map(); // date -> spend sum
-  for (const op of state.ops) {
-    if (!opInPeriod(op, s)) continue;
-    if (!isSpend(op)) continue;
-    if (bankFilter !== "all" && op.bankId !== bankFilter) continue;
-    map.set(op.date, (map.get(op.date) || 0) + Math.abs(safeNum(op.amount)));
-  }
-
-  const days = [];
-  const vals = [];
-  let cum = 0;
-
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    const iso = `${y}-${m}-${day}`;
-
-    cum += (map.get(iso) || 0);
-    days.push(iso);
-    vals.push(cum);
-  }
-
-  return { days, vals };
-}
-
-function drawChart() {
-  const canvas = $("progressChart");
-  const ctx = canvas.getContext("2d");
-  const bank = $("chartBank").value || "all";
-
-  const cssW = canvas.clientWidth || 300;
-  const cssH = canvas.clientHeight || 260;
-
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(cssW * dpr);
-  canvas.height = Math.floor(cssH * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  const { days, vals } = buildDailySpendSeries(bank);
-
-  ctx.clearRect(0, 0, cssW, cssH);
-
-  const padL = 54, padR = 14, padT = 14, padB = 28;
-  const w = cssW - padL - padR;
-  const h = cssH - padT - padB;
-
-  // grid
-  ctx.strokeStyle = "rgba(255,255,255,.08)";
-  ctx.lineWidth = 1;
-  const gridY = 4;
-  for (let i = 0; i <= gridY; i++) {
-    const y = padT + (h * i) / gridY;
-    ctx.beginPath();
-    ctx.moveTo(padL, y);
-    ctx.lineTo(padL + w, y);
-    ctx.stroke();
-  }
-
-  const maxV = Math.max(1, ...vals);
-  const minV = 0;
-
-  function xAt(i) {
-    if (days.length <= 1) return padL;
-    return padL + (w * i) / (days.length - 1);
-  }
-  function yAt(v) {
-    const t = (v - minV) / (maxV - minV);
-    return padT + h - t * h;
-  }
-
-  // line
-  ctx.strokeStyle = "rgba(43,99,255,.95)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  vals.forEach((v, i) => {
-    const x = xAt(i);
-    const y = yAt(v);
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  });
-  ctx.stroke();
-
-  // y labels
-  ctx.fillStyle = "rgba(233,236,255,.85)";
-  ctx.font = "12px system-ui";
-  ctx.textAlign = "right";
-  ctx.textBaseline = "middle";
-  for (let i = 0; i <= gridY; i++) {
-    const v = (maxV * (gridY - i)) / gridY;
-    const y = padT + (h * i) / gridY;
-    ctx.fillText(fmtUAH(v), padL - 8, y);
-  }
-
-  // x ticks
-  ctx.textAlign = "center";
-  ctx.textBaseline = "top";
-  const ticks = Math.min(5, days.length);
-  for (let i = 0; i < ticks; i++) {
-    const idx = Math.round((days.length - 1) * (i / (ticks - 1 || 1)));
-    const x = xAt(idx);
-    ctx.fillText(days[idx].slice(5), x, padT + h + 8);
-  }
-
-  // title
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-  const title = bank === "all" ? "Усі банки (витрати)" : `${bankName(bank)} (витрати)`;
-  ctx.fillText(title, padL, 4);
-}
-
 /* Render all */
 function renderAll() {
   const s = state.settings;
   $("periodLabel").textContent = `Період: ${s.startDate} → ${s.endDate}`;
+  rebuildBankSelects();
+  renderTurnoverStrip();
   renderSummary();
   renderOps();
-  drawChart();
 }
 
 /* Bind */
@@ -821,7 +714,6 @@ function bind() {
   $("btnDeleteSelected").addEventListener("click", deleteSelected);
   $("btnExport").addEventListener("click", exportJSON);
   $("search").addEventListener("input", renderOps);
-  $("chartBank").addEventListener("change", drawChart);
 
   $("btnAddBank").addEventListener("click", addBank);
   $("bankNameInput").addEventListener("keydown", (e) => {
@@ -843,7 +735,6 @@ function bind() {
     if (e.target === $("modal")) closeEdit();
   });
 
-  window.addEventListener("resize", drawChart);
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !$("modal").classList.contains("hidden")) closeEdit();
   });
@@ -856,7 +747,7 @@ renderAll();
 
 /* PWA SW registration */
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js?v=301").catch(() => {});
+  navigator.serviceWorker.register("./sw.js?v=302").catch(() => {});
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     window.location.reload();
   });

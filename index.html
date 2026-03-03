@@ -14,9 +14,8 @@
 
   <title>Планер витратного обороту</title>
 
-  <!-- bump ?v= to force refresh when needed -->
-  <link rel="stylesheet" href="style.css?v=301" />
-  <link rel="manifest" href="manifest.json?v=301" />
+  <link rel="stylesheet" href="style.css?v=302" />
+  <link rel="manifest" href="manifest.json?v=302" />
 </head>
 
 <body>
@@ -147,29 +146,25 @@
       </p>
     </section>
 
-    <!-- Chart -->
+    <!-- NEW: Turnover strip (top) -->
     <section class="card span-2">
       <div class="panel-header">
         <div>
-          <h2>Графік прогресу</h2>
+          <h2>Оборот по банках</h2>
           <div class="muted" id="periodLabel"></div>
         </div>
 
-        <div class="panel-controls">
-          <label class="field">
-            <span>Показати банк</span>
-            <select id="chartBank">
-              <option value="all" selected>Усі (сума)</option>
-            </select>
-          </label>
+        <div class="muted small">
+          (за обраний період, тільки “Використання”)
         </div>
       </div>
 
-      <div class="chart-wrap">
-        <canvas id="progressChart"></canvas>
-      </div>
+      <div id="turnoverStrip" class="turnover-strip"></div>
 
-      <p class="muted small">Лінія показує накопичені витрати (“Використання”) по днях.</p>
+      <div class="turnover-total">
+        <div class="muted">Загальний витратний оборот:</div>
+        <div id="turnoverTotal" class="turnover-total-value">—</div>
+      </div>
     </section>
 
     <!-- Summary -->
@@ -277,6 +272,6 @@
     Дані зберігаються локально (LocalStorage). Для переносу — експорт/імпорт JSON.
   </footer>
 
-  <script src="app.js?v=301"></script>
+  <script src="app.js?v=302"></script>
 </body>
 </html>
