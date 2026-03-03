@@ -1,6 +1,6 @@
 /* Планер витратного обороту (PWA)
    Оборот = сума "Використання" за період
-   Банки: додавання/перейменування/переміщення/видалення + своя ціль
+   Банки: додавання/перейменування/ціль/переміщення/видалення
 */
 
 const LS_KEY = "turnover_planner_v6_no_chart_strip";
@@ -323,28 +323,18 @@ function applySettingsToUI() {
   renderBanksList();
 }
 
-function readSettingsFromUI() {
-  const s = state.settings;
-  return {
-    startDate: $("startDate").value || s.startDate,
-    endDate: $("endDate").value || s.endDate,
-    targetDefault: Math.max(0, safeNum($("targetDefault").value)),
-    plannedSpendOps: Math.max(1, Math.floor(safeNum($("plannedSpendOps").value))),
-    maxOpAmount: Math.max(0, safeNum($("maxOpAmount").value))),
-    minGapDays: Math.max(0, Math.floor(safeNum($("minGapDays").value))),
-    holdAfterTopUpDays: Math.max(0, Math.floor(safeNum($("holdAfterTopUpDays").value))),
-    hideRecsWhenDone: $("hideRecsWhenDone").value === "no" ? "no" : "yes",
-    banks: s.banks
-  };
-}
-
 function saveSettings() {
-  // fix: maxOpAmount parse safely
   const s = state.settings;
-  state.settings = {
-    ...readSettingsFromUI(),
-    maxOpAmount: Math.max(0, safeNum($("maxOpAmount").value))
-  };
+
+  s.startDate = $("startDate").value || s.startDate;
+  s.endDate = $("endDate").value || s.endDate;
+
+  s.targetDefault = Math.max(0, safeNum($("targetDefault").value));
+  s.plannedSpendOps = Math.max(1, Math.floor(safeNum($("plannedSpendOps").value)));
+  s.maxOpAmount = Math.max(0, safeNum($("maxOpAmount").value));
+  s.minGapDays = Math.max(0, Math.floor(safeNum($("minGapDays").value)));
+  s.holdAfterTopUpDays = Math.max(0, Math.floor(safeNum($("holdAfterTopUpDays").value)));
+  s.hideRecsWhenDone = $("hideRecsWhenDone").value === "no" ? "no" : "yes";
 
   saveState(state);
   $("settingsSaved").textContent = "Збережено ✓";
@@ -369,7 +359,6 @@ function computeSummary() {
   const byBank = new Map();
   for (const b of banks) {
     byBank.set(b.id, {
-      bankId: b.id,
       spendTurnover: 0,
       spendCount: 0,
       lastDateAny: null,
@@ -408,12 +397,10 @@ function computeSummary() {
     const done = remaining === 0;
     const hideRecs = s.hideRecsWhenDone === "yes" && done;
 
-    // recommend type
     let recType = "Використання";
     if (r.lastTypeAny === "Використання") recType = "Поповнення";
     if (r.lastTypeAny === "Поповнення") recType = "Використання";
 
-    // recommend date
     let note = "";
     let base = r.lastDateAny || s.startDate;
     let recDate = addDaysISO(base, s.minGapDays);
@@ -428,7 +415,6 @@ function computeSummary() {
     if (recDate < s.startDate) recDate = s.startDate;
     if (recDate > s.endDate) recDate = s.endDate;
 
-    // recommend amount
     let recAmount = 0;
     if (!hideRecs && remaining > 0) {
       const denom = remainingSpendOps > 0 ? remainingSpendOps : 1;
@@ -620,7 +606,7 @@ function addOp() {
   if (!["Поповнення","Використання"].includes(type)) return (err.textContent = "Невірний тип.");
   if (!(amount > 0)) return (err.textContent = "Сума має бути більшою за 0.");
 
-  // warnings (not blocking)
+  // Warnings (not blocking)
   const s = state.settings;
   const opsBank = state.ops
     .filter(o => o.bankId === bankId)
@@ -680,7 +666,6 @@ function exportJSON() {
   a.remove();
   URL.revokeObjectURL(url);
 }
-
 function importJSON(file) {
   const reader = new FileReader();
   reader.onload = () => {
@@ -726,7 +711,6 @@ function bind() {
     e.target.value = "";
   });
 
-  // modal
   $("btnCloseModal").addEventListener("click", closeEdit);
   $("btnCancelEdit").addEventListener("click", closeEdit);
   $("btnSaveEdit").addEventListener("click", saveEdit);
