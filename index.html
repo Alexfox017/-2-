@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Планер витратного обороту по картках</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b1020">
+</head>
+<body>
+  <header class="wrap header">
+    <div>
+      <h1>Планер витратного обороту по картках</h1>
+      <p class="muted">Оборот рахується тільки за типом <b>“Використання”</b> (витрати).</p>
+    </div>
+    <div class="header-actions">
+      <button id="btnExport" class="btn">Експорт JSON</button>
+      <label class="btn btn-secondary">
+        Імпорт JSON
+        <input id="fileImport" type="file" accept="application/json" hidden />
+      </label>
+      <button id="btnClear" class="btn btn-danger">Очистити</button>
+    </div>
+  </header>
+
+  <main class="wrap grid">
+    <!-- Налаштування -->
+    <section class="card">
+      <h2>Налаштування</h2>
+
+      <div class="form-grid">
+        <label class="field">
+          <span>Початок періоду</span>
+          <input id="startDate" type="date" />
+        </label>
+
+        <label class="field">
+          <span>Кінець періоду</span>
+          <input id="endDate" type="date" />
+        </label>
+
+        <label class="field">
+          <span>Ціль витратного обороту на карту (грн)</span>
+          <input id="targetPerCard" type="number" min="0" step="100" value="40000" />
+        </label>
+
+        <label class="field">
+          <span>План витратних операцій/місяць (на карту)</span>
+          <input id="plannedSpendOps" type="number" min="1" step="1" value="10" />
+        </label>
+
+        <label class="field">
+          <span>Макс сума 1 операції (грн)</span>
+          <input id="maxOpAmount" type="number" min="0" step="100" value="5000" />
+        </label>
+
+        <label class="field">
+          <span>Мін. пауза між будь-якими операціями (днів)</span>
+          <input id="minGapDays" type="number" min="0" step="1" value="3" />
+        </label>
+
+        <label class="field">
+          <span>Пауза після “Поповнення” до “Використання” (днів)</span>
+          <input id="holdAfterTopUpDays" type="number" min="0" step="1" value="5" />
+        </label>
+
+        <label class="field">
+          <span>Ховати рекомендації, якщо ціль досягнута</span>
+          <select id="hideRecsWhenDone">
+            <option value="yes" selected>Так</option>
+            <option value="no">Ні</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <button id="btnSaveSettings" class="btn">Зберегти налаштування</button>
+        <span id="settingsSaved" class="muted"></span>
+      </div>
+    </section>
+
+    <!-- Додавання операції -->
+    <section class="card">
+      <h2>Додати операцію</h2>
+
+      <div class="form-grid">
+        <label class="field">
+          <span>Дата</span>
+          <input id="opDate" type="date" />
+        </label>
+
+        <label class="field">
+          <span>Картка</span>
+          <select id="opCard">
+            <option value="1">Карта 1</option>
+            <option value="2">Карта 2</option>
+            <option value="3">Карта 3</option>
+            <option value="4">Карта 4</option>
+            <option value="5">Карта 5</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Тип</span>
+          <select id="opType">
+            <option value="Поповнення">Поповнення</option>
+            <option value="Використання">Використання</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Сума (грн)</span>
+          <input id="opAmount" type="number" min="0" step="1" placeholder="Напр. 3500" />
+        </label>
+      </div>
+
+      <div class="row">
+        <button id="btnAddOp" class="btn">Додати</button>
+        <span id="opError" class="error"></span>
+      </div>
+
+      <div class="hint">
+        Оборот = сума “Використання” за період. “Поповнення” не додає оборот, але допомагає планувати цикл.
+      </div>
+    </section>
+
+    <!-- Графік -->
+    <section class="card span-2">
+      <div class="panel-header">
+        <h2>Графік прогресу витратного обороту</h2>
+        <div class="row">
+          <label class="field" style="min-width:220px">
+            <span>Показати карту</span>
+            <select id="chartCard">
+              <option value="all" selected>Усі (сума)</option>
+              <option value="1">Карта 1</option>
+              <option value="2">Карта 2</option>
+              <option value="3">Карта 3</option>
+              <option value="4">Карта 4</option>
+              <option value="5">Карта 5</option>
+            </select>
+          </label>
+          <div class="muted" id="periodLabel"></div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="progressChart" width="1100" height="260"></canvas>
+      </div>
+      <div class="muted" style="margin-top:8px;font-size:12px">
+        Лінія показує накопичені витрати (“Використання”) по днях у вибраному періоді.
+      </div>
+    </section>
+
+    <!-- Панель -->
+    <section class="card span-2">
+      <h2>Панель по картках</h2>
+
+      <div class="table-wrap">
+        <table id="summaryTable">
+          <thead>
+            <tr>
+              <th>Карта</th>
+              <th>Витратний оборот</th>
+              <th>Залишок до цілі</th>
+              <th>Витратних опер. у періоді</th>
+              <th>Залишок витратних опер. (план)</th>
+              <th>Остання дата</th>
+              <th>Рекоменд. дата</th>
+              <th>Рекоменд. тип</th>
+              <th>Рекоменд. сума</th>
+              <th>Примітка</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Журнал -->
+    <section class="card span-2">
+      <div class="panel-header">
+        <h2>Журнал операцій</h2>
+        <div class="row">
+          <input id="search" class="search" placeholder="Пошук: дата, карта, тип…" />
+          <button id="btnDeleteSelected" class="btn btn-danger">Видалити вибрані</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="opsTable">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Дата</th>
+              <th>Карта</th>
+              <th>Тип</th>
+              <th>Сума</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Модалка редагування -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Редагувати операцію</h3>
+        <button id="btnCloseModal" class="icon-btn">✕</button>
+      </div>
+
+      <div class="form-grid">
+        <label class="field">
+          <span>Дата</span>
+          <input id="editDate" type="date" />
+        </label>
+        <label class="field">
+          <span>Картка</span>
+          <select id="editCard">
+            <option value="1">Карта 1</option>
+            <option value="2">Карта 2</option>
+            <option value="3">Карта 3</option>
+            <option value="4">Карта 4</option>
+            <option value="5">Карта 5</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Тип</span>
+          <select id="editType">
+            <option value="Поповнення">Поповнення</option>
+            <option value="Використання">Використання</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Сума (грн)</span>
+          <input id="editAmount" type="number" min="0" step="1" />
+        </label>
+      </div>
+
+      <div class="row">
+        <button id="btnSaveEdit" class="btn">Зберегти</button>
+        <button id="btnCancelEdit" class="btn btn-secondary">Скасувати</button>
+        <span id="editError" class="error"></span>
+      </div>
+    </div>
+  </div>
+
+  <footer class="wrap footer muted">
+    Дані зберігаються локально у браузері (LocalStorage). Для переносу — експорт/імпорт JSON.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
