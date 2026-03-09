@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b1220">
+  <meta name="theme-color" content="#08110d">
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,15 +11,22 @@
 
   <title>Планер витратного обороту</title>
 
-  <link rel="stylesheet" href="style.css?v=600" />
+  <link rel="stylesheet" href="style.css?v=700" />
   <link rel="manifest" href="manifest.json?v=600" />
 </head>
 
 <body>
+  <div class="money-bg"></div>
   <div class="app-bg"></div>
 
+  <div class="money-rain" aria-hidden="true">
+    <span>$</span><span>$</span><span>$</span><span>$</span><span>$</span>
+    <span>$</span><span>$</span><span>$</span><span>$</span><span>$</span>
+    <span>$</span><span>$</span><span>$</span><span>$</span><span>$</span>
+  </div>
+
   <div class="app-shell">
-    <header class="topbar">
+    <header class="topbar premium-topbar">
       <div class="topbar__left">
         <div class="topbar__badge">Finance Planner</div>
         <h1>Планер витратного обороту</h1>
@@ -37,7 +44,7 @@
     </header>
 
     <main class="layout">
-      <section class="panel panel-hero">
+      <section class="panel panel-hero glass-panel">
         <div class="section-head">
           <div>
             <div class="section-kicker">Огляд</div>
@@ -57,10 +64,10 @@
           </div>
         </div>
 
-        <div id="turnoverStrip" class="turnover-strip"></div>
+        <div id="turnoverStrip" class="turnover-strip premium-strip"></div>
       </section>
 
-      <section class="panel">
+      <section class="panel glass-panel">
         <div class="section-head section-head--tight">
           <div>
             <div class="section-kicker">Операції</div>
@@ -100,7 +107,7 @@
         <div id="opError" class="feedback feedback-error"></div>
       </section>
 
-      <section class="panel">
+      <section class="panel glass-panel">
         <div class="section-head section-head--tight">
           <div>
             <div class="section-kicker">Період і правила</div>
@@ -160,7 +167,7 @@
         <div id="settingsSaved" class="feedback feedback-success"></div>
       </section>
 
-      <section class="panel">
+      <section class="panel glass-panel">
         <div class="section-head section-head--tight">
           <div>
             <div class="section-kicker">Банки та цілі</div>
@@ -176,7 +183,7 @@
         <div id="banksList" class="banks-list"></div>
       </section>
 
-      <section class="panel panel-full">
+      <section class="panel panel-full glass-panel">
         <div class="section-head section-head--tight">
           <div>
             <div class="section-kicker">Детально</div>
@@ -184,7 +191,7 @@
           </div>
         </div>
 
-        <div class="table-shell">
+        <div class="table-shell premium-table">
           <table id="summaryTable">
             <thead>
               <tr>
@@ -208,7 +215,7 @@
         </div>
       </section>
 
-      <section class="panel panel-full">
+      <section class="panel panel-full glass-panel">
         <div class="section-head section-head--tight">
           <div>
             <div class="section-kicker">Історія</div>
@@ -221,7 +228,7 @@
           <button id="btnDeleteSelected" class="btn btn-danger" type="button">Видалити вибрані</button>
         </div>
 
-        <div class="table-shell">
+        <div class="table-shell premium-table">
           <table id="opsTable">
             <thead>
               <tr>

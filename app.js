@@ -8,27 +8,32 @@ function todayISO() {
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
+
 function startOfMonthISO(date = new Date()) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   return `${y}-${m}-01`;
 }
+
 function endOfMonthISO(date = new Date()) {
   const y = date.getFullYear();
   const m = date.getMonth() + 1;
   const last = new Date(y, m, 0).getDate();
   return `${y}-${String(m).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
 }
+
 function parseISO(s) {
   const [y, m, d] = s.split("-").map(Number);
   return new Date(y, m - 1, d);
 }
+
 function daysBetweenInclusive(aISO, bISO) {
   const a = parseISO(aISO);
   const b = parseISO(bISO);
   const ms = 24 * 60 * 60 * 1000;
   return Math.max(1, Math.round((b - a) / ms) + 1);
 }
+
 function addDaysISO(iso, days) {
   const d = parseISO(iso);
   d.setDate(d.getDate() + days);
@@ -37,18 +42,26 @@ function addDaysISO(iso, days) {
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
+
 function safeNum(v) {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 }
+
 function fmtUAH(n) {
   const x = Math.round((Number(n) || 0) * 100) / 100;
-  return x.toLocaleString("uk-UA", { style: "currency", currency: "UAH", maximumFractionDigits: 0 });
+  return x.toLocaleString("uk-UA", {
+    style: "currency",
+    currency: "UAH",
+    maximumFractionDigits: 0
+  });
 }
+
 function pct(n) {
   const x = Math.max(0, Number(n) || 0);
   return `${Math.round(x)}%`;
 }
+
 function escapeHtml(str) {
   return String(str)
     .replaceAll("&", "&amp;")
@@ -66,6 +79,7 @@ function loadState() {
     return null;
   }
 }
+
 function saveState(state) {
   localStorage.setItem(LS_KEY, JSON.stringify(state));
 }
@@ -110,13 +124,18 @@ function normalizeState(st) {
   s.maxOpAmount = Math.max(0, safeNum(s.maxOpAmount ?? 5000));
   s.minGapDays = Math.max(0, Math.floor(safeNum(s.minGapDays ?? 3)));
   s.holdAfterTopUpDays = Math.max(0, Math.floor(safeNum(s.holdAfterTopUpDays ?? 5)));
-  s.hideRecsWhenDone = (s.hideRecsWhenDone === "no") ? "no" : "yes";
+  s.hideRecsWhenDone = s.hideRecsWhenDone === "no" ? "no" : "yes";
 
   if (!Array.isArray(s.banks)) s.banks = [];
   s.banks = s.banks.map((b) => {
     if (typeof b === "string") {
-      return { id: crypto.randomUUID(), name: b, target: Math.max(0, safeNum(s.targetDefault)) };
+      return {
+        id: crypto.randomUUID(),
+        name: b,
+        target: Math.max(0, safeNum(s.targetDefault))
+      };
     }
+
     return {
       id: b?.id || crypto.randomUUID(),
       name: (b?.name || "Без назви").trim() || "Без назви",
@@ -124,21 +143,23 @@ function normalizeState(st) {
     };
   });
 
-  const bankIds = new Set(s.banks.map(b => b.id));
+  const bankIds = new Set(s.banks.map((b) => b.id));
+
   st.ops = st.ops
-    .filter(op => op && typeof op === "object")
-    .map(op => ({
+    .filter((op) => op && typeof op === "object")
+    .map((op) => ({
       id: op.id || crypto.randomUUID(),
       date: op.date,
       bankId: op.bankId,
       type: op.type,
       amount: safeNum(op.amount)
     }))
-    .filter(op =>
-      op.date &&
-      bankIds.has(op.bankId) &&
-      (op.type === "Поповнення картки" || op.type === "Вихід з картки") &&
-      op.amount > 0
+    .filter(
+      (op) =>
+        op.date &&
+        bankIds.has(op.bankId) &&
+        (op.type === "Поповнення картки" || op.type === "Вихід з картки") &&
+        op.amount > 0
     );
 
   if (st.settings.banks.length === 0) return defaultState();
@@ -148,13 +169,22 @@ function normalizeState(st) {
 let state = normalizeState(loadState()) || defaultState();
 saveState(state);
 
-function isSpend(op) { return op.type === "Вихід з картки"; }
-function isTopUp(op) { return op.type === "Поповнення картки"; }
-function opInPeriod(op, s) { return op.date >= s.startDate && op.date <= s.endDate; }
+function isSpend(op) {
+  return op.type === "Вихід з картки";
+}
+
+function isTopUp(op) {
+  return op.type === "Поповнення картки";
+}
+
+function opInPeriod(op, s) {
+  return op.date >= s.startDate && op.date <= s.endDate;
+}
 
 function bankById(id) {
-  return state.settings.banks.find(b => b.id === id) || null;
+  return state.settings.banks.find((b) => b.id === id) || null;
 }
+
 function bankName(id) {
   return bankById(id)?.name || "—";
 }
@@ -182,8 +212,8 @@ function rebuildBankSelects() {
     editBank.appendChild(o2);
   }
 
-  if (banks.some(b => b.id === opVal)) opBank.value = opVal;
-  if (banks.some(b => b.id === editVal)) editBank.value = editVal;
+  if (banks.some((b) => b.id === opVal)) opBank.value = opVal;
+  if (banks.some((b) => b.id === editVal)) editBank.value = editVal;
   if (!opBank.value && banks[0]) opBank.value = banks[0].id;
 }
 
@@ -215,7 +245,7 @@ function renderBanksList() {
     container.appendChild(row);
   });
 
-  container.querySelectorAll("input[data-bankname]").forEach(inp => {
+  container.querySelectorAll("input[data-bankname]").forEach((inp) => {
     inp.addEventListener("input", () => {
       const id = inp.getAttribute("data-bankname");
       const bank = bankById(id);
@@ -227,7 +257,7 @@ function renderBanksList() {
     });
   });
 
-  container.querySelectorAll("input[data-banktarget]").forEach(inp => {
+  container.querySelectorAll("input[data-banktarget]").forEach((inp) => {
     inp.addEventListener("input", () => {
       const id = inp.getAttribute("data-banktarget");
       const bank = bankById(id);
@@ -238,13 +268,15 @@ function renderBanksList() {
     });
   });
 
-  container.querySelectorAll("button[data-up]").forEach(btn => {
+  container.querySelectorAll("button[data-up]").forEach((btn) => {
     btn.addEventListener("click", () => moveBank(btn.getAttribute("data-up"), -1));
   });
-  container.querySelectorAll("button[data-down]").forEach(btn => {
+
+  container.querySelectorAll("button[data-down]").forEach((btn) => {
     btn.addEventListener("click", () => moveBank(btn.getAttribute("data-down"), +1));
   });
-  container.querySelectorAll("button[data-delbank]").forEach(btn => {
+
+  container.querySelectorAll("button[data-delbank]").forEach((btn) => {
     btn.addEventListener("click", () => deleteBank(btn.getAttribute("data-delbank")));
   });
 }
@@ -253,7 +285,11 @@ function addBank() {
   const name = ($("bankNameInput").value || "").trim();
   if (!name) return;
 
-  const targetDefault = Math.max(0, safeNum($("targetDefault").value || state.settings.targetDefault));
+  const targetDefault = Math.max(
+    0,
+    safeNum($("targetDefault").value || state.settings.targetDefault)
+  );
+
   state.settings.banks.push({
     id: crypto.randomUUID(),
     name,
@@ -269,8 +305,9 @@ function addBank() {
 
 function moveBank(id, dir) {
   const banks = state.settings.banks;
-  const i = banks.findIndex(b => b.id === id);
+  const i = banks.findIndex((b) => b.id === id);
   if (i === -1) return;
+
   const j = i + dir;
   if (j < 0 || j >= banks.length) return;
 
@@ -282,16 +319,17 @@ function moveBank(id, dir) {
 }
 
 function deleteBank(id) {
-  const used = state.ops.some(op => op.bankId === id);
+  const used = state.ops.some((op) => op.bankId === id);
   if (used) {
     alert("Не можна видалити банк, бо він використовується в операціях.");
     return;
   }
+
   const bank = bankById(id);
   if (!bank) return;
   if (!confirm(`Видалити банк "${bank.name}"?`)) return;
 
-  state.settings.banks = state.settings.banks.filter(b => b.id !== id);
+  state.settings.banks = state.settings.banks.filter((b) => b.id !== id);
   saveState(state);
   rebuildBankSelects();
   renderBanksList();
@@ -327,7 +365,10 @@ function saveSettings() {
 
   saveState(state);
   $("settingsSaved").textContent = "Збережено ✓";
-  setTimeout(() => $("settingsSaved").textContent = "", 1200);
+  setTimeout(() => {
+    $("settingsSaved").textContent = "";
+  }, 1200);
+
   renderAll();
 }
 
@@ -342,9 +383,10 @@ function clearAll() {
 function computeByBank() {
   const s = state.settings;
   const banks = s.banks;
-  const opsInPeriod = state.ops.filter(op => opInPeriod(op, s));
+  const opsInPeriod = state.ops.filter((op) => opInPeriod(op, s));
 
   const by = new Map();
+
   for (const b of banks) {
     by.set(b.id, {
       spendSum: 0,
@@ -363,6 +405,7 @@ function computeByBank() {
     if (!row) continue;
 
     const a = Math.abs(safeNum(op.amount));
+
     if (isSpend(op)) {
       row.spendSum += a;
       row.spendCount += 1;
@@ -388,6 +431,7 @@ function computeSummary() {
   const by = computeByBank();
 
   const results = [];
+
   for (const b of banks) {
     const r = by.get(b.id);
     const target = Math.max(0, safeNum(b.target ?? s.targetDefault));
@@ -407,7 +451,11 @@ function computeSummary() {
     let base = r.lastDateAny || s.startDate;
     let recDate = addDaysISO(base, s.minGapDays);
 
-    if (recType === "Вихід з картки" && r.lastTopUpDate && (!r.lastSpendDate || r.lastTopUpDate >= r.lastSpendDate)) {
+    if (
+      recType === "Вихід з картки" &&
+      r.lastTopUpDate &&
+      (!r.lastSpendDate || r.lastTopUpDate >= r.lastSpendDate)
+    ) {
       recDate = addDaysISO(r.lastTopUpDate, s.holdAfterTopUpDays);
       note = `Пауза після поповнення: ${s.holdAfterTopUpDays} дн.`;
     } else {
@@ -436,8 +484,8 @@ function computeSummary() {
       topUpCount: r.topUpCount,
       topUpSum: r.topUpSum,
       lastDate: r.lastDateAny || "—",
-      recDate: hideRecs ? "—" : (remaining > 0 ? recDate : "—"),
-      recType: hideRecs ? "—" : (remaining > 0 ? recType : "—"),
+      recDate: hideRecs ? "—" : remaining > 0 ? recDate : "—",
+      recType: hideRecs ? "—" : remaining > 0 ? recType : "—",
       recAmount: hideRecs ? 0 : recAmount,
       note: hideRecs ? "Ціль досягнута" : note
     });
@@ -448,7 +496,7 @@ function computeSummary() {
 
 function computeTopAnalytics() {
   const s = state.settings;
-  const ops = state.ops.filter(op => opInPeriod(op, s));
+  const ops = state.ops.filter((op) => opInPeriod(op, s));
   const spendOps = ops.filter(isSpend);
   const topUpOps = ops.filter(isTopUp);
 
@@ -486,7 +534,7 @@ function renderAnalyticsTop() {
     },
     {
       title: "Середній оборот",
-      value: fmtUAH(a.avgDaily) + " / день",
+      value: `${fmtUAH(a.avgDaily)} / день`,
       sub: `Середній “Вихід з картки”: ${fmtUAH(a.avgExit)}`
     },
     {
@@ -513,19 +561,74 @@ function renderTurnoverStrip() {
   const strip = $("turnoverStrip");
   strip.innerHTML = "";
 
-  for (const r of rows) {
+  const bankThemes = [
+    "theme-gold",
+    "theme-green",
+    "theme-dark",
+    "theme-emerald",
+    "theme-premium"
+  ];
+
+  rows.forEach((r, index) => {
     const item = document.createElement("div");
-    item.className = "turnover-item";
+    const progress = Math.max(0, Math.min(100, Math.round(r.pctDone)));
+    const theme = bankThemes[index % bankThemes.length];
+
+    item.className = `turnover-item bank-card-ui ${theme}`;
+
     item.innerHTML = `
-      <div class="turnover-name">${escapeHtml(r.bankName)}</div>
-      <div class="turnover-value">${fmtUAH(r.turnover)}</div>
-      <div class="turnover-sub">
-        Ціль: ${fmtUAH(r.target)} • ${pct(r.pctDone)}<br>
-        Залишок: ${fmtUAH(r.remaining)}
+      <div class="bank-card-top">
+        <div>
+          <div class="bank-card-label">Bank Account</div>
+          <div class="turnover-name">${escapeHtml(r.bankName)}</div>
+        </div>
+        <div class="bank-card-logo">$</div>
+      </div>
+
+      <div class="bank-balance-wrap">
+        <div class="bank-balance-label">Оборот за період</div>
+        <div class="turnover-value">${fmtUAH(r.turnover)}</div>
+      </div>
+
+      <div class="bank-mini-stats">
+        <div class="bank-mini-box">
+          <span>Ціль</span>
+          <strong>${fmtUAH(r.target)}</strong>
+        </div>
+        <div class="bank-mini-box">
+          <span>Залишок</span>
+          <strong>${fmtUAH(r.remaining)}</strong>
+        </div>
+      </div>
+
+      <div class="bank-progress-block">
+        <div class="bank-progress-head">
+          <span>Виконання цілі</span>
+          <strong>${progress}%</strong>
+        </div>
+        <div class="bank-progress-bar">
+          <div class="bank-progress-fill" style="width:${progress}%"></div>
+        </div>
+      </div>
+
+      <div class="bank-card-footer">
+        <div class="bank-footer-item">
+          <span>Виходів</span>
+          <strong>${r.spendCount}</strong>
+        </div>
+        <div class="bank-footer-item">
+          <span>Поповнень</span>
+          <strong>${r.topUpCount}</strong>
+        </div>
+        <div class="bank-footer-item">
+          <span>Рек. сума</span>
+          <strong>${r.recAmount ? fmtUAH(r.recAmount) : "—"}</strong>
+        </div>
       </div>
     `;
+
     strip.appendChild(item);
-  }
+  });
 }
 
 function renderSummary() {
@@ -533,6 +636,7 @@ function renderSummary() {
   tbody.innerHTML = "";
 
   const rows = computeSummary();
+
   for (const r of rows) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -559,6 +663,7 @@ let editingId = null;
 function matchesSearch(op, q) {
   if (!q) return true;
   const s = q.toLowerCase();
+
   return (
     op.date.toLowerCase().includes(s) ||
     bankName(op.bankId).toLowerCase().includes(s) ||
@@ -574,7 +679,7 @@ function renderOps() {
 
   const ops = [...state.ops]
     .sort((a, b) => (a.date < b.date ? 1 : -1))
-    .filter(op => matchesSearch(op, q));
+    .filter((op) => matchesSearch(op, q));
 
   for (const op of ops) {
     const tr = document.createElement("tr");
@@ -592,22 +697,22 @@ function renderOps() {
     tbody.appendChild(tr);
   }
 
-  tbody.querySelectorAll("button[data-del]").forEach(btn => {
+  tbody.querySelectorAll("button[data-del]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const id = btn.getAttribute("data-del");
-      state.ops = state.ops.filter(x => x.id !== id);
+      state.ops = state.ops.filter((x) => x.id !== id);
       saveState(state);
       renderAll();
     });
   });
 
-  tbody.querySelectorAll("button[data-edit]").forEach(btn => {
+  tbody.querySelectorAll("button[data-edit]").forEach((btn) => {
     btn.addEventListener("click", () => openEdit(btn.getAttribute("data-edit")));
   });
 }
 
 function openEdit(id) {
-  const op = state.ops.find(x => x.id === id);
+  const op = state.ops.find((x) => x.id === id);
   if (!op) return;
 
   editingId = id;
@@ -639,10 +744,12 @@ function saveEdit() {
 
   if (!date) return (err.textContent = "Вкажи дату.");
   if (!bankById(bankId)) return (err.textContent = "Обери банк.");
-  if (!["Поповнення картки","Вихід з картки"].includes(type)) return (err.textContent = "Невірний тип.");
+  if (!["Поповнення картки", "Вихід з картки"].includes(type)) {
+    return (err.textContent = "Невірний тип.");
+  }
   if (!(amount > 0)) return (err.textContent = "Сума має бути більшою за 0.");
 
-  const idx = state.ops.findIndex(x => x.id === editingId);
+  const idx = state.ops.findIndex((x) => x.id === editingId);
   if (idx === -1) return;
 
   state.ops[idx] = { ...state.ops[idx], date, bankId, type, amount };
@@ -662,7 +769,9 @@ function addOp() {
 
   if (!date) return (err.textContent = "Вкажи дату.");
   if (!bankById(bankId)) return (err.textContent = "Обери банк.");
-  if (!["Поповнення картки","Вихід з картки"].includes(type)) return (err.textContent = "Невірний тип.");
+  if (!["Поповнення картки", "Вихід з картки"].includes(type)) {
+    return (err.textContent = "Невірний тип.");
+  }
   if (!(amount > 0)) return (err.textContent = "Сума має бути більшою за 0.");
 
   state.ops.push({
@@ -679,18 +788,24 @@ function addOp() {
 }
 
 function deleteSelected() {
-  const checks = Array.from(document.querySelectorAll('#opsTable input[type="checkbox"][data-id]:checked'));
+  const checks = Array.from(
+    document.querySelectorAll('#opsTable input[type="checkbox"][data-id]:checked')
+  );
+
   if (checks.length === 0) return alert("Немає вибраних рядків.");
   if (!confirm(`Видалити ${checks.length} операцій?`)) return;
 
-  const ids = new Set(checks.map(c => c.getAttribute("data-id")));
-  state.ops = state.ops.filter(op => !ids.has(op.id));
+  const ids = new Set(checks.map((c) => c.getAttribute("data-id")));
+  state.ops = state.ops.filter((op) => !ids.has(op.id));
   saveState(state);
   renderAll();
 }
 
 function exportJSON() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(state, null, 2)], {
+    type: "application/json"
+  });
+
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -703,6 +818,7 @@ function exportJSON() {
 
 function importJSON(file) {
   const reader = new FileReader();
+
   reader.onload = () => {
     try {
       state = normalizeState(JSON.parse(String(reader.result || "")));
@@ -713,6 +829,7 @@ function importJSON(file) {
       alert("Не вдалося імпортувати файл. Перевір JSON.");
     }
   };
+
   reader.readAsText(file);
 }
 
@@ -724,7 +841,11 @@ function liveUpdatePeriod() {
 
 function renderAll() {
   const s = state.settings;
-  $("periodLabel").textContent = `Період: ${s.startDate} → ${s.endDate} (${daysBetweenInclusive(s.startDate, s.endDate)} дн.)`;
+  $("periodLabel").textContent = `Період: ${s.startDate} → ${s.endDate} (${daysBetweenInclusive(
+    s.startDate,
+    s.endDate
+  )} дн.)`;
+
   rebuildBankSelects();
   renderAnalyticsTop();
   renderTurnoverStrip();
