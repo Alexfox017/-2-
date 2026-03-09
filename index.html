@@ -2,9 +2,8 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b1020">
+  <meta name="theme-color" content="#0b1220">
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,226 +11,240 @@
 
   <title>Планер витратного обороту</title>
 
-  <link rel="stylesheet" href="style.css?v=303" />
-  <link rel="manifest" href="manifest.json?v=303" />
+  <link rel="stylesheet" href="style.css?v=500" />
+  <link rel="manifest" href="manifest.json?v=500" />
 </head>
 
 <body>
-  <header class="wrap header">
-    <div class="header-title">
-      <h1>Планер витратного обороту</h1>
-      <p class="muted">Оборот рахується тільки за <b>“Використання”</b> (витрати).</p>
-    </div>
+  <div class="app-bg"></div>
 
-    <div class="header-actions">
-      <button id="btnExport" class="btn" type="button">Експорт JSON</button>
-      <label class="btn btn-secondary">
-        Імпорт JSON
-        <input id="fileImport" type="file" accept="application/json" hidden />
-      </label>
-      <button id="btnClear" class="btn btn-danger" type="button">Очистити</button>
-    </div>
-  </header>
-
-  <main class="wrap grid">
-    <!-- Settings -->
-    <section class="card">
-      <h2>Налаштування</h2>
-
-      <div class="form-grid">
-        <label class="field">
-          <span>Початок періоду</span>
-          <input id="startDate" type="date" />
-        </label>
-
-        <label class="field">
-          <span>Кінець періоду</span>
-          <input id="endDate" type="date" />
-        </label>
-
-        <label class="field">
-          <span>Ціль за замовчуванням для нового банку (грн)</span>
-          <input id="targetDefault" type="number" min="0" step="100" value="40000" />
-        </label>
-
-        <label class="field">
-          <span>План витратних операцій/період (на банк)</span>
-          <input id="plannedSpendOps" type="number" min="1" step="1" value="10" />
-        </label>
-
-        <label class="field">
-          <span>Макс сума 1 операції (грн)</span>
-          <input id="maxOpAmount" type="number" min="0" step="100" value="5000" />
-        </label>
-
-        <label class="field">
-          <span>Мін. пауза між будь-якими операціями (днів)</span>
-          <input id="minGapDays" type="number" min="0" step="1" value="3" />
-        </label>
-
-        <label class="field">
-          <span>Пауза після “Поповнення” до “Використання” (днів)</span>
-          <input id="holdAfterTopUpDays" type="number" min="0" step="1" value="5" />
-        </label>
-
-        <label class="field">
-          <span>Ховати рекомендації, якщо ціль досягнута</span>
-          <select id="hideRecsWhenDone">
-            <option value="yes" selected>Так</option>
-            <option value="no">Ні</option>
-          </select>
-        </label>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar__left">
+        <div class="topbar__badge">Finance Planner</div>
+        <h1>Планер витратного обороту</h1>
+        <p>Оборот рахується тільки за <b>“Використання”</b></p>
       </div>
 
-      <!-- Banks manager -->
-      <div class="banks-box">
-        <h3 class="h3">Банки (назва + своя ціль)</h3>
+      <div class="topbar__actions">
+        <button id="btnExport" class="btn btn-primary" type="button">Експорт</button>
+        <label class="btn btn-secondary">
+          Імпорт
+          <input id="fileImport" type="file" accept="application/json" hidden />
+        </label>
+        <button id="btnClear" class="btn btn-danger" type="button">Очистити</button>
+      </div>
+    </header>
 
-        <div class="banks-row">
-          <input id="bankNameInput" placeholder="Назва банку (напр. Приват)" />
+    <main class="layout">
+      <section class="panel panel-hero">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Огляд</div>
+            <h2>Аналітика за період</h2>
+            <div id="periodLabel" class="section-sub">—</div>
+          </div>
+        </div>
+
+        <div id="analyticsTop" class="analytics-grid"></div>
+
+        <div class="section-divider"></div>
+
+        <div class="section-head section-head--tight">
+          <div>
+            <div class="section-kicker">Оборот</div>
+            <h3>По банках</h3>
+          </div>
+        </div>
+
+        <div id="turnoverStrip" class="turnover-strip"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head section-head--tight">
+          <div>
+            <div class="section-kicker">Операції</div>
+            <h2>Додати операцію</h2>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <label class="field">
+            <span>Дата</span>
+            <input id="opDate" type="date" />
+          </label>
+
+          <label class="field">
+            <span>Банк</span>
+            <select id="opBank"></select>
+          </label>
+
+          <label class="field">
+            <span>Тип</span>
+            <select id="opType">
+              <option value="Поповнення">Поповнення</option>
+              <option value="Використання">Використання</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Сума</span>
+            <input id="opAmount" type="number" min="0" step="1" placeholder="Напр. 3500" />
+          </label>
+        </div>
+
+        <div class="actions-row">
+          <button id="btnAddOp" class="btn btn-primary btn-block" type="button">Додати операцію</button>
+        </div>
+
+        <div id="opError" class="feedback feedback-error"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head section-head--tight">
+          <div>
+            <div class="section-kicker">Період і правила</div>
+            <h2>Налаштування</h2>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <label class="field">
+            <span>Початок періоду</span>
+            <input id="startDate" type="date" />
+          </label>
+
+          <label class="field">
+            <span>Кінець періоду</span>
+            <input id="endDate" type="date" />
+          </label>
+
+          <label class="field">
+            <span>Ціль за замовчуванням</span>
+            <input id="targetDefault" type="number" min="0" step="100" value="40000" />
+          </label>
+
+          <label class="field">
+            <span>План витратних операцій</span>
+            <input id="plannedSpendOps" type="number" min="1" step="1" value="10" />
+          </label>
+
+          <label class="field">
+            <span>Макс сума 1 операції</span>
+            <input id="maxOpAmount" type="number" min="0" step="100" value="5000" />
+          </label>
+
+          <label class="field">
+            <span>Мін. пауза</span>
+            <input id="minGapDays" type="number" min="0" step="1" value="3" />
+          </label>
+
+          <label class="field">
+            <span>Пауза після поповнення</span>
+            <input id="holdAfterTopUpDays" type="number" min="0" step="1" value="5" />
+          </label>
+
+          <label class="field">
+            <span>Ховати рекомендації після цілі</span>
+            <select id="hideRecsWhenDone">
+              <option value="yes" selected>Так</option>
+              <option value="no">Ні</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="actions-row">
+          <button id="btnSaveSettings" class="btn btn-primary btn-block" type="button">Зберегти налаштування</button>
+        </div>
+
+        <div id="settingsSaved" class="feedback feedback-success"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head section-head--tight">
+          <div>
+            <div class="section-kicker">Банки та цілі</div>
+            <h2>Керування банками</h2>
+          </div>
+        </div>
+
+        <div class="bank-add-row">
+          <input id="bankNameInput" class="bank-add-input" placeholder="Нова назва банку" />
           <button id="btnAddBank" class="btn btn-secondary" type="button">Додати банк</button>
         </div>
 
-        <div class="banks-list" id="banksList"></div>
+        <div id="banksList" class="banks-list"></div>
+      </section>
 
-        <p class="muted small">
-          Можна додавати, перейменовувати, ставити ціль, міняти порядок, видаляти.
-        </p>
-      </div>
-
-      <div class="row">
-        <button id="btnSaveSettings" class="btn" type="button">Зберегти</button>
-        <span id="settingsSaved" class="muted"></span>
-      </div>
-
-      <p class="muted small" style="margin-top:10px">
-        ⚡ Період можна змінювати — аналітика оновлюється одразу (без натискання “Зберегти”).
-      </p>
-    </section>
-
-    <!-- Add operation -->
-    <section class="card">
-      <h2>Додати операцію</h2>
-
-      <div class="form-grid">
-        <label class="field">
-          <span>Дата</span>
-          <input id="opDate" type="date" />
-        </label>
-
-        <label class="field">
-          <span>Банк</span>
-          <select id="opBank"></select>
-        </label>
-
-        <label class="field">
-          <span>Тип</span>
-          <select id="opType">
-            <option value="Поповнення">Поповнення</option>
-            <option value="Використання">Використання</option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span>Сума (грн)</span>
-          <input id="opAmount" type="number" min="0" step="1" placeholder="Напр. 3500" />
-        </label>
-      </div>
-
-      <div class="row">
-        <button id="btnAddOp" class="btn" type="button">Додати</button>
-        <span id="opError" class="error"></span>
-      </div>
-
-      <p class="hint">
-        “Поповнення” не додає оборот. Оборот = сума “Використання” за період.
-      </p>
-    </section>
-
-    <!-- Analytics -->
-    <section class="card span-2">
-      <div class="panel-header">
-        <div>
-          <h2>Аналітика за період</h2>
-          <div class="muted" id="periodLabel"></div>
-        </div>
-        <div class="muted small">(оновлюється одразу при зміні дат/операцій)</div>
-      </div>
-
-      <div class="analytics-grid" id="analyticsTop"></div>
-
-      <h3 class="h3" style="margin-top:14px">Оборот по банках</h3>
-      <div id="turnoverStrip" class="turnover-strip"></div>
-    </section>
-
-    <!-- Summary -->
-    <section class="card span-2">
-      <h2>Панель по банках</h2>
-
-      <div class="table-wrap">
-        <table id="summaryTable">
-          <thead>
-            <tr>
-              <th>Банк</th>
-              <th>Ціль</th>
-              <th>Витратний оборот</th>
-              <th>% цілі</th>
-              <th>Залишок</th>
-              <th>Витратних</th>
-              <th>Поповнень</th>
-              <th>Поповнення сума</th>
-              <th>Остання дата</th>
-              <th>Рек. дата</th>
-              <th>Рек. тип</th>
-              <th>Рек. сума</th>
-              <th>Примітка</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <p class="muted small">На телефоні таблиця скролиться горизонтально — це ок.</p>
-    </section>
-
-    <!-- Ops log -->
-    <section class="card span-2">
-      <div class="panel-header">
-        <div>
-          <h2>Журнал операцій</h2>
-          <p class="muted small">Пошук: дата, банк, тип, сума.</p>
+      <section class="panel panel-full">
+        <div class="section-head section-head--tight">
+          <div>
+            <div class="section-kicker">Детально</div>
+            <h2>Панель по банках</h2>
+          </div>
         </div>
 
-        <div class="panel-controls">
-          <input id="search" class="search" placeholder="Пошук…" />
+        <div class="table-shell">
+          <table id="summaryTable">
+            <thead>
+              <tr>
+                <th>Банк</th>
+                <th>Ціль</th>
+                <th>Оборот</th>
+                <th>%</th>
+                <th>Залишок</th>
+                <th>Витратних</th>
+                <th>Поповнень</th>
+                <th>Сума поповнення</th>
+                <th>Остання дата</th>
+                <th>Рек. дата</th>
+                <th>Рек. тип</th>
+                <th>Рек. сума</th>
+                <th>Примітка</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel panel-full">
+        <div class="section-head section-head--tight">
+          <div>
+            <div class="section-kicker">Історія</div>
+            <h2>Журнал операцій</h2>
+          </div>
+        </div>
+
+        <div class="journal-toolbar">
+          <input id="search" class="search-input" placeholder="Пошук..." />
           <button id="btnDeleteSelected" class="btn btn-danger" type="button">Видалити вибрані</button>
         </div>
-      </div>
 
-      <div class="table-wrap">
-        <table id="opsTable">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Дата</th>
-              <th>Банк</th>
-              <th>Тип</th>
-              <th>Сума</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+        <div class="table-shell">
+          <table id="opsTable">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Дата</th>
+                <th>Банк</th>
+                <th>Тип</th>
+                <th>Сума</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
 
-  <!-- Edit modal -->
   <div id="modal" class="modal hidden" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3>Редагувати операцію</h3>
-        <button id="btnCloseModal" class="icon-btn" type="button" aria-label="Закрити">✕</button>
+        <button id="btnCloseModal" class="icon-btn" type="button">✕</button>
       </div>
 
       <div class="form-grid">
@@ -254,22 +267,19 @@
         </label>
 
         <label class="field">
-          <span>Сума (грн)</span>
+          <span>Сума</span>
           <input id="editAmount" type="number" min="0" step="1" />
         </label>
       </div>
 
-      <div class="row">
-        <button id="btnSaveEdit" class="btn" type="button">Зберегти</button>
+      <div class="actions-row">
+        <button id="btnSaveEdit" class="btn btn-primary" type="button">Зберегти</button>
         <button id="btnCancelEdit" class="btn btn-secondary" type="button">Скасувати</button>
-        <span id="editError" class="error"></span>
       </div>
+
+      <div id="editError" class="feedback feedback-error"></div>
     </div>
   </div>
-
-  <footer class="wrap footer muted small">
-    Дані зберігаються локально (LocalStorage). Для переносу — експорт/імпорт JSON.
-  </footer>
 
   <script src="app.js?v=303"></script>
 </body>
