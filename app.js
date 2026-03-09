@@ -232,8 +232,14 @@ function renderBanksList() {
 
       <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
         <span class="muted small">Ціль</span>
-        <input data-banktarget="${b.id}" type="number" min="0" step="100"
-               value="${Number(Math.max(0, safeNum(b.target)))}" style="width:160px" />
+        <input
+          data-banktarget="${b.id}"
+          type="number"
+          min="0"
+          step="100"
+          value="${Number(Math.max(0, safeNum(b.target)))}"
+          style="width:160px"
+        />
       </div>
 
       <div class="bank-actions">
@@ -684,7 +690,7 @@ function renderOps() {
   for (const op of ops) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><input type="checkbox" data-id="${op.id}"/></td>
+      <td><input type="checkbox" data-id="${op.id}" /></td>
       <td>${op.date}</td>
       <td>${escapeHtml(bankName(op.bankId))}</td>
       <td>${escapeHtml(op.type)}</td>
@@ -889,6 +895,6 @@ bind();
 renderAll();
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js?v=600").catch(() => {});
+  navigator.serviceWorker.register("./sw.js?v=702").catch(() => {});
   navigator.serviceWorker.addEventListener("controllerchange", () => window.location.reload());
 }

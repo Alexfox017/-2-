@@ -2,19 +2,21 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#08110d">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+  />
+  <meta name="theme-color" content="#08110d" />
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Оборот">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Оборот" />
 
   <title>Планер витратного обороту</title>
 
-  <link rel="stylesheet" href="style.css?v=700" />
-  <link rel="manifest" href="manifest.json?v=600" />
+  <link rel="stylesheet" href="style.css?v=702" />
+  <link rel="manifest" href="manifest.json?v=702" />
 </head>
-
 <body>
   <div class="money-bg"></div>
   <div class="app-bg"></div>
@@ -22,7 +24,7 @@
   <div class="money-rain" aria-hidden="true">
     <span>$</span><span>$</span><span>$</span><span>$</span><span>$</span>
     <span>$</span><span>$</span><span>$</span><span>$</span><span>$</span>
-    <span>$</span><span>$</span><span>$</span><span>$</span><span>$</span>
+    <span>$</span><span>$</span>
   </div>
 
   <div class="app-shell">
@@ -35,10 +37,12 @@
 
       <div class="topbar__actions">
         <button id="btnExport" class="btn btn-primary" type="button">Експорт</button>
+
         <label class="btn btn-secondary">
           Імпорт
           <input id="fileImport" type="file" accept="application/json" hidden />
         </label>
+
         <button id="btnClear" class="btn btn-danger" type="button">Очистити</button>
       </div>
     </header>
@@ -101,7 +105,9 @@
         </div>
 
         <div class="actions-row">
-          <button id="btnAddOp" class="btn btn-primary btn-block" type="button">Додати операцію</button>
+          <button id="btnAddOp" class="btn btn-primary btn-block" type="button">
+            Додати операцію
+          </button>
         </div>
 
         <div id="opError" class="feedback feedback-error"></div>
@@ -161,7 +167,9 @@
         </div>
 
         <div class="actions-row">
-          <button id="btnSaveSettings" class="btn btn-primary btn-block" type="button">Зберегти налаштування</button>
+          <button id="btnSaveSettings" class="btn btn-primary btn-block" type="button">
+            Зберегти налаштування
+          </button>
         </div>
 
         <div id="settingsSaved" class="feedback feedback-success"></div>
@@ -225,7 +233,9 @@
 
         <div class="journal-toolbar">
           <input id="search" class="search-input" placeholder="Пошук..." />
-          <button id="btnDeleteSelected" class="btn btn-danger" type="button">Видалити вибрані</button>
+          <button id="btnDeleteSelected" class="btn btn-danger" type="button">
+            Видалити вибрані
+          </button>
         </div>
 
         <div class="table-shell premium-table">
@@ -279,7 +289,7 @@
         </label>
       </div>
 
-      <div class="actions-row">
+      <div class="actions-row modal-actions">
         <button id="btnSaveEdit" class="btn btn-primary" type="button">Зберегти</button>
         <button id="btnCancelEdit" class="btn btn-secondary" type="button">Скасувати</button>
       </div>
@@ -288,6 +298,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=600"></script>
+  <script src="app.js?v=702"></script>
 </body>
 </html>
