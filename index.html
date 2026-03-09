@@ -11,8 +11,8 @@
 
   <title>Планер витратного обороту</title>
 
-  <link rel="stylesheet" href="style.css?v=500" />
-  <link rel="manifest" href="manifest.json?v=500" />
+  <link rel="stylesheet" href="style.css?v=600" />
+  <link rel="manifest" href="manifest.json?v=600" />
 </head>
 
 <body>
@@ -23,7 +23,7 @@
       <div class="topbar__left">
         <div class="topbar__badge">Finance Planner</div>
         <h1>Планер витратного обороту</h1>
-        <p>Оборот рахується тільки за <b>“Використання”</b></p>
+        <p>Оборот і ліміти рахуються тільки по <b>“Вихід з картки”</b></p>
       </div>
 
       <div class="topbar__actions">
@@ -82,8 +82,8 @@
           <label class="field">
             <span>Тип</span>
             <select id="opType">
-              <option value="Поповнення">Поповнення</option>
-              <option value="Використання">Використання</option>
+              <option value="Поповнення картки">Поповнення картки</option>
+              <option value="Вихід з картки">Вихід з картки</option>
             </select>
           </label>
 
@@ -125,7 +125,7 @@
           </label>
 
           <label class="field">
-            <span>План витратних операцій</span>
+            <span>План виходів з картки</span>
             <input id="plannedSpendOps" type="number" min="1" step="1" value="10" />
           </label>
 
@@ -135,7 +135,7 @@
           </label>
 
           <label class="field">
-            <span>Мін. пауза</span>
+            <span>Мін. пауза між операціями</span>
             <input id="minGapDays" type="number" min="0" step="1" value="3" />
           </label>
 
@@ -145,7 +145,7 @@
           </label>
 
           <label class="field">
-            <span>Ховати рекомендації після цілі</span>
+            <span>Ховати рекомендації після досягнення цілі</span>
             <select id="hideRecsWhenDone">
               <option value="yes" selected>Так</option>
               <option value="no">Ні</option>
@@ -193,7 +193,7 @@
                 <th>Оборот</th>
                 <th>%</th>
                 <th>Залишок</th>
-                <th>Витратних</th>
+                <th>Виходів</th>
                 <th>Поповнень</th>
                 <th>Сума поповнення</th>
                 <th>Остання дата</th>
@@ -261,8 +261,8 @@
         <label class="field">
           <span>Тип</span>
           <select id="editType">
-            <option value="Поповнення">Поповнення</option>
-            <option value="Використання">Використання</option>
+            <option value="Поповнення картки">Поповнення картки</option>
+            <option value="Вихід з картки">Вихід з картки</option>
           </select>
         </label>
 
@@ -281,6 +281,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=303"></script>
+  <script src="app.js?v=600"></script>
 </body>
 </html>
