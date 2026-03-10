@@ -1,6 +1,12 @@
 const LS_KEY = "turnover_planner_v8_money_design";
 const $ = (id) => document.getElementById(id);
 
+/* =========================
+   GOOGLE SHEETS
+   ========================= */
+const GOOGLE_SHEETS_URL =
+  "https://script.google.com/macros/s/AKfycbw7a4phpF9UyCoczNzJP38actg6NIRZU2J6NbiL1fcIyVQqA0dR_NehqwQenI3_pluCbg/exec";
+
 function todayISO() {
   const d = new Date();
   const y = d.getFullYear();
@@ -187,6 +193,29 @@ function bankById(id) {
 
 function bankName(id) {
   return bankById(id)?.name || "—";
+}
+
+async function sendToGoogleSheets(op) {
+  try {
+    const bank = bankById(op.bankId);
+
+    const formData = new URLSearchParams();
+    formData.append("date", op.date || "");
+    formData.append("bank", bank ? bank.name : "");
+    formData.append("type", op.type || "");
+    formData.append("amount", String(Number(op.amount || 0)));
+    formData.append("device", navigator.userAgent || "unknown");
+
+    const response = await fetch(GOOGLE_SHEETS_URL, {
+      method: "POST",
+      body: formData
+    });
+
+    const text = await response.text();
+    console.log("Google Sheets response:", text);
+  } catch (error) {
+    console.log("Помилка відправки в Google Sheets:", error);
+  }
 }
 
 function rebuildBankSelects() {
@@ -760,11 +789,11 @@ function saveEdit() {
 
   state.ops[idx] = { ...state.ops[idx], date, bankId, type, amount };
   saveState(state);
-  closeEdit();
   renderAll();
+  closeEdit();
 }
 
-function addOp() {
+async function addOp() {
   const err = $("opError");
   err.textContent = "";
 
@@ -780,15 +809,19 @@ function addOp() {
   }
   if (!(amount > 0)) return (err.textContent = "Сума має бути більшою за 0.");
 
-  state.ops.push({
+  const newOp = {
     id: crypto.randomUUID(),
     date,
     bankId,
     type,
     amount
-  });
+  };
 
+  state.ops.push(newOp);
   saveState(state);
+
+  await sendToGoogleSheets(newOp);
+
   $("opAmount").value = "";
   renderAll();
 }
@@ -895,6 +928,6 @@ bind();
 renderAll();
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js?v=702").catch(() => {});
+  navigator.serviceWorker.register("./sw.js?v=703").catch(() => {});
   navigator.serviceWorker.addEventListener("controllerchange", () => window.location.reload());
 }
